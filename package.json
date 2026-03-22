@@ -1,0 +1,29 @@
+{
+  "name": "kickbi-backend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "swc src -d dist --strip-leading-paths",
+    "build:watch": "swc src -d dist --strip-leading-paths --watch",
+    "typecheck": "tsc --noEmit",
+    "deploy:dev": "npm run build && sam deploy --config-env dev",
+    "deploy:stag": "npm run build && sam deploy --config-env stag",
+    "deploy:prod": "npm run build && sam deploy --config-env prod",
+    "invoke:dev": "sam local invoke ApiFunction --env-vars env.json --parameter-overrides Stage=dev",
+    "remove:dev": "sam delete --config-env dev --no-prompts",
+    "remove:stag": "sam delete --config-env stag --no-prompts",
+    "remove:prod": "sam delete --config-env prod --no-prompts"
+  },
+  "devDependencies": {
+    "@swc/cli": "^0.6",
+    "@swc/core": "^1",
+    "@types/aws-lambda": "^8",
+    "@types/express": "^5.0.6",
+    "@types/node": "^25.5.0",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "@codegenie/serverless-express": "^4.17.1",
+    "express": "^5.2.1"
+  }
+}
