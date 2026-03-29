@@ -2,7 +2,7 @@ import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "
 import type { FastifyInstance, InjectOptions } from "fastify";
 import { buildApp } from "./app";
 import { HOP_BY_HOP_HEADERS, RESPONSE_STATUS_CODES } from "./utils/constants";
-import { sendError, sendSuccess } from "./utils/response";
+import { sendError } from "./utils/response";
 import { APPLICATION_INITIALIZATION_ERROR } from "./utils/responseMessages";
 
 let fastify: FastifyInstance | null = null;
@@ -61,5 +61,5 @@ export const handler = async (
         }
     }
 
-    return sendSuccess(res.statusCode, res.body ? { headers: resHeaders, body: res.body } : {});
+    return { statusCode: res.statusCode, headers: resHeaders, body: res.body };
 };
