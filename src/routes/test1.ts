@@ -1,9 +1,9 @@
-import { Router } from "express";
+import { FastifyPluginAsync } from "fastify";
 
-const router = Router();
+const test1Routes: FastifyPluginAsync = async (app) => {
+  app.get("/test1", async () => {
+    return { message: "GET /test1" };
+  });
+};
 
-router.get("/test1", (req, res) => {
-  res.json({ message: "GET /test1" });
-});
-
-export default router;
+export default test1Routes;

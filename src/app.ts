@@ -1,10 +1,15 @@
-import express from "express";
+import Fastify from "fastify";
+import { loadConfig } from "./config/secrets";
 import testRoutes from "./routes/test";
 import test1Routes from "./routes/test1";
 
-export const app = express();
+export async function buildApp() {
+  await loadConfig();
 
-app.use(express.json());
+  const app = Fastify({ logger: true });
 
-app.use(testRoutes);
-app.use(test1Routes);
+  app.register(testRoutes);
+  app.register(test1Routes);
+
+  return app;
+}

@@ -3,27 +3,37 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "dev": "nodemon",
     "build": "swc src -d dist --strip-leading-paths",
     "build:watch": "swc src -d dist --strip-leading-paths --watch",
     "typecheck": "tsc --noEmit",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "deploy:dev": "npm run build && sam deploy --config-env dev",
     "deploy:stag": "npm run build && sam deploy --config-env stag",
     "deploy:prod": "npm run build && sam deploy --config-env prod",
-    "invoke:dev": "sam local invoke ApiFunction --env-vars env.json --parameter-overrides Stage=dev",
+    "invoke:dev": "npm run build && sam local invoke ApiFunction --env-vars env.json --parameter-overrides Stage=dev",
+    "start-api:dev": "npm run build && sam local start-api --env-vars env.json --parameter-overrides Stage=dev",
     "remove:dev": "sam delete --config-env dev --no-prompts",
     "remove:stag": "sam delete --config-env stag --no-prompts",
     "remove:prod": "sam delete --config-env prod --no-prompts"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@swc-node/register": "^1.11.1",
     "@swc/cli": "^0.6",
     "@swc/core": "^1",
     "@types/aws-lambda": "^8",
-    "@types/express": "^5.0.6",
     "@types/node": "^25.5.0",
-    "typescript": "^5"
+    "eslint": "^10.1.0",
+    "nodemon": "^3.1.14",
+    "typescript": "^5",
+    "typescript-eslint": "^8.57.2"
   },
   "dependencies": {
-    "@codegenie/serverless-express": "^4.17.1",
-    "express": "^5.2.1"
+    "@aws-sdk/client-secrets-manager": "^3",
+    "@fastify/aws-lambda": "^5",
+    "dotenv": "^16",
+    "fastify": "^5"
   }
 }
