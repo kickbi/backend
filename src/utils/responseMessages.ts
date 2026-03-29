@@ -1,0 +1,1 @@
+export const APPLICATION_INITIALIZATION_ERROR = "App initialization failed";

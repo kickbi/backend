@@ -7,14 +7,14 @@ import test1Routes from "./routes/test1";
 const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 export async function buildApp() {
-  await loadConfig();
+    await loadConfig();
 
-  const app = Fastify({
-    logger: isLambda ? false : { level: "info" },
-  });
+    const app = Fastify({
+        logger: isLambda ? false : { level: "info" },
+    });
 
-  app.register(testRoutes);
-  app.register(test1Routes);
+    app.register(testRoutes);
+    app.register(test1Routes);
 
-  return app;
+    return app;
 }
