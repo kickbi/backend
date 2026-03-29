@@ -1,5 +1,5 @@
 import type { APIGatewayProxyEventV2, APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import type { FastifyInstance, FastifyReply, InjectOptions } from "fastify";
+import type { FastifyInstance, InjectOptions } from "fastify";
 import { buildApp } from "./app";
 import { HOP_BY_HOP_HEADERS, RESPONSE_STATUS_CODES } from "./utils/constants";
 import { sendError, sendSuccess } from "./utils/response";
@@ -24,14 +24,12 @@ const ensureInitialized = async (): Promise<boolean> => {
 
 export const handler = async (
     event: APIGatewayProxyEventV2,
-    response: FastifyReply
-) => {
+): Promise<APIGatewayProxyStructuredResultV2> => {
     if (!(await ensureInitialized()) || !fastify) {
         return sendError(
-            response,
-            RESPONSE_STATUS_CODES.INTERNAL_SERVER_ERROR,
             APPLICATION_INITIALIZATION_ERROR,
-            initError
+            initError,
+            RESPONSE_STATUS_CODES.INTERNAL_SERVER_ERROR,
         );
     }
 
@@ -63,13 +61,5 @@ export const handler = async (
         }
     }
 
-    return sendSuccess(
-        response,
-        res.statusCode,
-        res.statusMessage || "",
-        {
-            headers: resHeaders,
-            body: res.body,
-        }
-    );
+    return sendSuccess(res.statusCode, res.body ? { headers: resHeaders, body: res.body } : {});
 };
