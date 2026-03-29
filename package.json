@@ -37,6 +37,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3",
     "dotenv": "^16",
-    "fastify": "^5"
+    "fastify": "^5",
+    "mongoose": "^9.3.3"
   }
 }

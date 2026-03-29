@@ -1,5 +1,6 @@
 import Fastify from "fastify";
 import { loadConfig } from "./config/secrets";
+import { connectDB } from "./db/connection";
 import testRoutes from "./routes/test";
 import test1Routes from "./routes/test1";
 
@@ -8,6 +9,7 @@ const isLambda = !!process.env.AWS_LAMBDA_FUNCTION_NAME;
 
 export async function buildApp() {
     await loadConfig();
+    await connectDB();
 
     const app = Fastify({
         logger: isLambda ? false : { level: "info" },
