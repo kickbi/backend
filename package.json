@@ -9,11 +9,11 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "deploy:dev": "npm run build && sam deploy --config-env dev",
-    "deploy:stag": "npm run build && sam deploy --config-env stag",
-    "deploy:prod": "npm run build && sam deploy --config-env prod",
-    "invoke:dev": "npm run build && sam local invoke ApiFunction --env-vars env.json --parameter-overrides Stage=dev",
-    "start-api:dev": "npm run build && sam local start-api --env-vars env.json --parameter-overrides Stage=dev",
+    "deploy:dev": "sam build && sam deploy --config-env dev",
+    "deploy:stag": "sam build && sam deploy --config-env stag",
+    "deploy:prod": "sam build && sam deploy --config-env prod",
+    "invoke:dev": "sam build && sam local invoke ApiFunction --env-vars env.json --parameter-overrides Stage=dev",
+    "start-api:dev": "sam build && sam local start-api --env-vars env.json --parameter-overrides Stage=dev",
     "remove:dev": "sam delete --config-env dev --no-prompts",
     "remove:stag": "sam delete --config-env stag --no-prompts",
     "remove:prod": "sam delete --config-env prod --no-prompts"
@@ -25,6 +25,7 @@
     "@swc/core": "^1",
     "@types/aws-lambda": "^8",
     "@types/node": "^25.5.0",
+    "esbuild": "^0.25",
     "eslint": "^10.1.0",
     "nodemon": "^3.1.14",
     "typescript": "^5",
@@ -32,7 +33,6 @@
   },
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3",
-    "@fastify/aws-lambda": "^5",
     "dotenv": "^16",
     "fastify": "^5"
   }

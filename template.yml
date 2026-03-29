@@ -9,6 +9,10 @@ Parameters:
     AllowedValues:
       - dev
       - prod
+  SecretName:
+    Type: String
+    Default: ""
+    Description: AWS Secrets Manager secret name (leave empty to skip)
 
 Globals:
   Function:
@@ -18,21 +22,29 @@ Globals:
     Environment:
       Variables:
         STAGE: !Ref Stage
-        AWS_SECRET_NAME: !Sub "${Stage}-kickbi-secrets"
+        AWS_SECRET_NAME: !Ref SecretName
 
 Resources:
   ApiFunction:
     Type: AWS::Serverless::Function
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        Minify: true
+        Target: "es2022"
+        Sourcemap: false
+        EntryPoints:
+          - src/handler.ts
     Properties:
       FunctionName: !Sub ${Stage}-kickbi
-      Handler: dist/handler.handler
+      Handler: handler.handler
       CodeUri: .
       Policies:
         - Statement:
             - Effect: Allow
               Action:
                 - secretsmanager:GetSecretValue
-              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${Stage}-kickbi-*"
+              Resource: !Sub "arn:aws:secretsmanager:${AWS::Region}:${AWS::AccountId}:secret:${SecretName}*"
       Events:
         RootApi:
           Type: HttpApi
@@ -47,7 +59,7 @@ Resources:
 
 Outputs:
   ApiUrl:
-    Description: API Gateway endpoint URL
+    Description: API Gateway URL (stable across redeployments)
     Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
   ApiFunctionArn:
     Description: Lambda Function ARN

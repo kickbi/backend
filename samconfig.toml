@@ -10,7 +10,7 @@ s3_bucket = "kickbi-dev-deployments"
 s3_prefix = "kickbi-backend-dev"
 region = "ap-south-1"
 profile = "kickbi-dev"
-parameter_overrides = "Stage=dev"
+parameter_overrides = "Stage=dev SecretName=KickbiDevelopment"
 confirm_changeset = false
 capabilities = "CAPABILITY_IAM"
 
@@ -24,7 +24,7 @@ stack_name = "kickbi-backend-prod"
 resolve_s3 = true
 region = "ap-south-1"
 profile = "kickbi-prod"
-parameter_overrides = "Stage=prod"
+parameter_overrides = "Stage=prod SecretName=KickbiProduction"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 

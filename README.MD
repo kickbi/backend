@@ -1,36 +1,40 @@
 # KickBi Backend
 
-Express + TypeScript backend that runs as a **local dev server** or as an **AWS Lambda** function via SAM.
+Fastify + TypeScript backend deployed as an **AWS Lambda** function via SAM, with local dev server support.
 
 ## Tech Stack
 
 - **Runtime:** Node.js 20.x
-- **Framework:** Express 5
-- **Language:** TypeScript (compiled with SWC)
-- **Serverless:** AWS SAM + `@codegenie/serverless-express`
+- **Framework:** Fastify 5
+- **Language:** TypeScript (compiled with SWC for local, esbuild for Lambda)
+- **Serverless:** AWS SAM (esbuild bundling)
+- **Secrets:** AWS Secrets Manager (local `.env` overrides)
 - **Linting:** ESLint with `typescript-eslint`
-- **Dev Server:** Nodemon with `@swc-node/register`
 
 ## Project Structure
 
 ```
-├── index.ts          # Entry point — routes to server or serverless based on RTE env
-├── app.ts            # Express app setup and route registration
-├── server.ts         # Local Express server (imports app.ts)
-├── serverless.ts     # Lambda handler (imports app.ts)
+├── index.ts              # Local dev entry point (dotenv + server)
 ├── src/
-│   └── routes/       # Route modules
-├── nodemon.json      # Nodemon + SWC config
-├── eslint.config.mjs # ESLint flat config
-├── template.yml      # SAM template
-├── samconfig.toml    # SAM deploy profiles (dev / prod)
-└── .swcrc            # SWC compiler config
+│   ├── app.ts            # Fastify app builder (shared by local & Lambda)
+│   ├── server.ts         # Local dev server (listen on localhost:3010)
+│   ├── handler.ts        # Lambda handler (fastify.inject)
+│   ├── config/
+│   │   └── secrets.ts    # AWS Secrets Manager loader
+│   └── routes/
+│       ├── test.ts
+│       └── test1.ts
+├── template.yml          # SAM template
+├── samconfig.toml        # SAM deploy profiles (dev / prod)
+├── nodemon.json          # Nodemon + SWC config
+└── .env                  # Local credentials (gitignored)
 ```
 
 ## Prerequisites
 
 - Node.js >= 20
-- AWS CLI & SAM CLI (for deployment)
+- AWS CLI & SAM CLI
+- esbuild installed globally: `npm install -g esbuild`
 - AWS profiles configured: `kickbi-dev`, `kickbi-prod`
 
 ## Setup
@@ -39,45 +43,46 @@ Express + TypeScript backend that runs as a **local dev server** or as an **AWS 
 npm install
 ```
 
+Copy `.env.example` to `.env` and fill in your credentials.
+
 ## Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start local dev server with nodemon + SWC (hot reload) |
-| `npm run build` | Compile TypeScript to `dist/` via SWC |
-| `npm run build:watch` | Compile in watch mode |
-| `npm run typecheck` | Run TypeScript type checking (no emit) |
+| `npm run dev` | Start local dev server (hot reload via nodemon + SWC) |
+| `npm run typecheck` | Run TypeScript type checking |
 | `npm run lint` | Run ESLint |
-| `npm run lint:fix` | Run ESLint with auto-fix |
-| `npm run deploy:dev` | Build and deploy to dev environment |
-| `npm run deploy:prod` | Build and deploy to production |
-| `npm run invoke:dev` | Invoke Lambda locally with SAM |
-| `npm run remove:dev` | Delete dev stack |
-| `npm run remove:prod` | Delete prod stack |
+| `npm run deploy:dev` | SAM build + deploy to dev |
+| `npm run deploy:prod` | SAM build + deploy to prod |
+| `npm run remove:dev` | Delete dev CloudFormation stack |
+| `npm run remove:prod` | Delete prod CloudFormation stack |
 
-## Runtime Modes
+## Local Development
 
-The entry point (`index.ts`) checks the `RTE` environment variable:
+```bash
+npm run dev
+# Server starts on http://localhost:3010
+```
 
-| `RTE` value | Behavior |
-|---|---|
-| `lambda` | Exports the serverless handler for AWS Lambda |
-| `server` (default) | Starts the Express server on `PORT` (default 3000) |
-
-Nodemon defaults `RTE=server` via `nodemon.json`.
+Local `.env` variables take priority over AWS Secrets Manager values.
 
 ## Deployment
-
-**Dev:**
 
 ```bash
 npm run deploy:dev
 ```
 
-**Production:**
+Deploys to `ap-south-1`. Only `handler.js` (single esbuild bundle) is uploaded — no `.env`, no `node_modules`.
 
-```bash
-npm run deploy:prod
-```
+**Dev API URL:** `https://r379m9d5hb.execute-api.ap-south-1.amazonaws.com`
 
-Both deploy to `ap-south-1`. Prod requires changeset confirmation.
+Prod deployment requires changeset confirmation.
+
+## Secrets
+
+The app loads secrets from AWS Secrets Manager at startup using:
+- `AWS_SECRET_NAME` env var (set via SAM parameter `SecretName`)
+- Lambda execution role has `secretsmanager:GetSecretValue` for the secret
+
+Locally, individual env vars in `.env` override any Secrets Manager values.
+

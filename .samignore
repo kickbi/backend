@@ -1,0 +1,25 @@
+# Environment / secrets - NEVER deploy
+.env
+.env.*
+env.json
+
+# Source files (SAM esbuild bundles from src/ directly)
+src/
+
+# Local dev & config files
+nodemon.json
+tsconfig.json
+eslint.config.mjs
+samconfig.toml
+README.MD
+
+# Build artifacts not needed in Lambda
+dist/
+.aws-sam/
+.swc/
+
+# Node dev dependencies
+node_modules/
+
+# IDE
+.vscode/

@@ -3,13 +3,12 @@ import {
   GetSecretValueCommand,
 } from "@aws-sdk/client-secrets-manager";
 
-let cachedConfig: Record<string, string> | null = null;
+let loaded = false;
 
-export async function loadConfig(): Promise<Record<string, string>> {
-  if (cachedConfig) return cachedConfig;
+export async function loadConfig(): Promise<void> {
+  if (loaded) return;
 
-  let secretValues: Record<string, string> = {};
-    const secretName = process.env.AWS_SECRET_NAME;
+  const secretName = process.env.AWS_SECRET_NAME;
 
   if (secretName) {
     try {
@@ -29,7 +28,13 @@ export async function loadConfig(): Promise<Record<string, string>> {
         new GetSecretValueCommand({ SecretId: secretName })
       );
       if (response.SecretString) {
-        secretValues = JSON.parse(response.SecretString);
+        const secretValues: Record<string, string> = JSON.parse(response.SecretString);
+        for (const [key, value] of Object.entries(secretValues)) {
+          // Only set if not already defined — env vars take priority
+          if (process.env[key] === undefined) {
+            process.env[key] = value;
+          }
+        }
       }
     } catch (error) {
       const msg = error instanceof Error ? error.message : String(error);
@@ -37,19 +42,9 @@ export async function loadConfig(): Promise<Record<string, string>> {
     }
   }
 
-  // Environment variables override Secrets Manager values
-  // In local dev: .env values (loaded via dotenv) take priority
-  // In Lambda: Lambda env vars take priority
-  cachedConfig = { ...secretValues };
-  for (const [key, value] of Object.entries(process.env)) {
-    if (value !== undefined) {
-      cachedConfig[key] = value;
-    }
-  }
-
-  return cachedConfig;
+  loaded = true;
 }
 
 export function getConfig(key: string): string | undefined {
-  return cachedConfig?.[key];
+  return process.env[key];
 }
