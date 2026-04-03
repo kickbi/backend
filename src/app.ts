@@ -1,6 +1,6 @@
 import Fastify from "fastify";
 import { loadConfig } from "./config/secrets";
-import { connectDB } from "./db/connection";
+import { connectDB } from "./config/db";
 import testRoutes from "./routes/test";
 import test1Routes from "./routes/test1";
 
