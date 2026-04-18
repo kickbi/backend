@@ -7,7 +7,7 @@ export const setNormalMongoConnection = (conn: mongoose.Connection) => {
 };
 
 export const getNormalMongoConnection = () => {
-    return normalMongoConnection;
+    return normalMongoConnection as mongoose.Connection;
 };
 
 export const createNormalConnection = async () => {
@@ -20,7 +20,9 @@ export const createNormalConnection = async () => {
         return Promise.reject(new Error("DB_URL environment variable is not set"));
     }
 
-    const options: mongoose.ConnectOptions = {};
+    const options: mongoose.ConnectOptions = {
+        maxPoolSize: 10,
+    };
 
     if (process.env.DB_USER && process.env.DB_PASS) {
         options.auth = {

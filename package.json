@@ -39,6 +39,8 @@
     "@fastify/aws-lambda": "^6.4.0",
     "dotenv": "^16",
     "fastify": "^5",
-    "mongoose": "^9.3.3"
+    "mongoose": "^9.3.3",
+    "passport": "^0.7.0",
+    "passport-local": "^1.0.0"
   }
 }
