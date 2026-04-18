@@ -2,7 +2,7 @@ import { USER_AUTH_PROVIDERS, USER_GENDER } from "../constants/user.constants";
 
 export type TAuthProvider = (typeof USER_AUTH_PROVIDERS)[keyof typeof USER_AUTH_PROVIDERS];
 
-export interface IEmailLoginRequest {
+export interface IEmailSignupRequest {
     email: string;
     password: string;
     firstName: string;
@@ -11,3 +11,7 @@ export interface IEmailLoginRequest {
     gender: (typeof USER_GENDER)[keyof typeof USER_GENDER];
 }
 
+export interface IEmailLoginRequest {
+    email: string;
+    password: string;
+}

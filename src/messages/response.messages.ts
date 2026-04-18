@@ -8,3 +8,5 @@ export const ACCOUNT_ALREADY_EXISTS = "An account with this email already exists
 export const INVALID_CREDENTIALS = "Invalid email or password";
 
 export const USER_SUCCESSFULLY_SIGNED_UP = "User successfully signed up";
+export const INVALID_EMAIL_OR_PASSWORD = "Invalid email or password";
+export const USER_SUCCESSFULLY_LOGGED_IN = "User successfully logged in";
