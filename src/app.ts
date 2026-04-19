@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import cors from "@fastify/cors";
 import { loadConfig } from "./config/secrets";
 import { connectDB } from "./config/db";
 
@@ -11,6 +12,16 @@ export async function buildApp() {
 
     const app = Fastify({
         logger: isLambda ? false : { level: "info" },
+    });
+
+    const allowedOrigins = (process.env.CORS_ORIGINS ?? "")
+        .split(",")
+        .map((o) => o.trim())
+        .filter(Boolean);
+
+    await app.register(cors, {
+        origin: allowedOrigins.length ? allowedOrigins : false,
+        credentials: true,
     });
 
     const { setupRoutes } = await import("./routesSetup");

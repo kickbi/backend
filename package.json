@@ -38,6 +38,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3",
     "@fastify/aws-lambda": "^6.4.0",
+    "@fastify/cors": "^11.2.0",
     "dotenv": "^16",
     "fastify": "^5",
     "joi": "^18.1.2",
