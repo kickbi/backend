@@ -13,6 +13,8 @@ export async function buildApp() {
         logger: isLambda ? false : { level: "info" },
     });
 
+    const { setupRoutes } = await import("./routesSetup");
+    setupRoutes(app);
 
     return app;
 }

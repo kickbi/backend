@@ -20,10 +20,7 @@ export const postSignUpWithEmail = async (req: FastifyRequest, res: FastifyReply
     try {
         const body = req.body as IEmailSignupRequest;
         
-        const isUserAuthExists = await UserAuthService.fetchUserAuthByEmailAndAuthProvider(
-            body.email,
-            USER_AUTH_PROVIDERS.LOCAL
-        );
+        const isUserAuthExists = await UserAuthService.fetchUserAuthByEmail(body.email);
 
         if (isUserAuthExists) {
             errorResponseCode = RESPONSE_STATUS_CODES.BAD_REQUEST;
@@ -64,13 +61,14 @@ export const postSignUpWithEmail = async (req: FastifyRequest, res: FastifyReply
         };
 
         return sendSuccessResponse(
+            res,
             RESPONSE_STATUS_CODES.CREATED,
             responseData,
             RESPONSE_MESSAGE.USER_SUCCESSFULLY_SIGNED_UP
         );
 
     }catch(error) {
-        return sendErrorResponse(error, errorResponseCode);
+        return sendErrorResponse(res, error, errorResponseCode);
     }
 };
 
@@ -83,15 +81,16 @@ export const postSignUpWithEmail = async (req: FastifyRequest, res: FastifyReply
 export const postLoginWithEmail = async (req: FastifyRequest, res: FastifyReply) => {
     try {
         const { email, password } = req.body as IEmailLoginRequest;
-        const userAuth = await UserAuthService.fetchUserAuthByEmail(
+        const userAuth = await UserAuthService.fetchUserAuthByEmailAndAuthProvider(
             email,
+            USER_AUTH_PROVIDERS.LOCAL
         );
 
         if (!userAuth || !userAuth.PasswordHash || !userAuth.PasswordSalt) {
             throw new Error(RESPONSE_MESSAGE.INVALID_EMAIL_OR_PASSWORD);
         }
 
-        const isPasswordValid = verifyPassword(password, userAuth.PasswordHash, userAuth.PasswordSalt);
+        const isPasswordValid = verifyPassword(password, userAuth.PasswordSalt, userAuth.PasswordHash);
 
         if (!isPasswordValid) {
             throw new Error(RESPONSE_MESSAGE.INVALID_EMAIL_OR_PASSWORD);
@@ -121,12 +120,13 @@ export const postLoginWithEmail = async (req: FastifyRequest, res: FastifyReply)
         };
 
         return sendSuccessResponse(
+            res,
             RESPONSE_STATUS_CODES.OK,
             responseData,
             RESPONSE_MESSAGE.USER_SUCCESSFULLY_LOGGED_IN
         );
     }
     catch(error) {
-        return sendErrorResponse(error, RESPONSE_STATUS_CODES.FORBIDDEN);
+        return sendErrorResponse(res, error, RESPONSE_STATUS_CODES.FORBIDDEN);
     }
 }
