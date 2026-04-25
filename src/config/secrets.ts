@@ -1,4 +1,5 @@
 import { SecretsManagerClient, GetSecretValueCommand } from "@aws-sdk/client-secrets-manager";
+import { secretManagerClient } from "./aws";
 
 let loaded = false;
 
@@ -9,18 +10,7 @@ export async function loadConfig(): Promise<void> {
 
     if (secretName) {
         try {
-            const clientConfig: ConstructorParameters<typeof SecretsManagerClient>[0] = {
-                region: process.env.AWS_LAMBDA_REGION || "ap-south-1",
-            };
-
-            // Use explicit credentials from .env when available (local dev)
-            const accessKeyId = process.env.AWS_LAMBDA_ACCESS_KEY_ID;
-            const secretAccessKey = process.env.AWS_LAMBDA_SECRET_ACCESS_KEY;
-            if (accessKeyId && secretAccessKey) {
-                clientConfig.credentials = { accessKeyId, secretAccessKey };
-            }
-
-            const client = new SecretsManagerClient(clientConfig);
+            const client = secretManagerClient;
             const response = await client.send(new GetSecretValueCommand({ SecretId: secretName }));
             if (response.SecretString) {
                 const secretValues: Record<string, string> = JSON.parse(response.SecretString);

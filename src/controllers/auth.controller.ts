@@ -1,14 +1,16 @@
 import { FastifyReply, FastifyRequest } from "fastify";
 import { sendErrorResponse, sendSuccessResponse } from "../utils/response";
 import { RESPONSE_STATUS_CODES } from "../constants/response.constants";
-import { IEmailLoginRequest, IEmailSignupRequest } from "../interface/auth.interface";
+import { IEmailLoginRequest, IEmailSignupRequest, IGoogleOAuthLoginCallbackRequest } from "../interface/auth.interface";
 import * as UserAuthService from "../service/user/userAuth.service";
 import { USER_AUTH_PROVIDERS } from "../constants/user.constants";
 import * as RESPONSE_MESSAGE from "../messages/response.messages";
-import { IUser, IUserAuth } from "../interface/user.interface";
+import { IUser, IUserAuth, IUserSession } from "../interface/user.interface";
 import * as UserService from "../service/user/user.service";
 import { generatePasswordHash, verifyPassword } from "../helpers/cryptoHelper";
 import { generateJWT } from "../helpers/jwtHelper";
+import { getGoogleUserInfo, verifyGoogleOAuthToken } from "../helpers/googleOAuthHelper";
+import { uploadFileToS3UsingFileUrl } from "../helpers/s3Helper";
 
 /*
     @desc    Sign up a user with email and password
@@ -103,11 +105,11 @@ export const postLoginWithEmail = async (req: FastifyRequest, res: FastifyReply)
         }
 
         // generate JWT token or session here and send in response
-        const payload = {
+        const payload: IUserSession = {
             User: {
                 _id: user._id,
                 FirstName: user.FirstName,
-                LastName: user.LastName,
+                LastName: user.LastName || "",
                 FullName: user.FullName,
                 Email: user.Email,
             }
@@ -130,3 +132,89 @@ export const postLoginWithEmail = async (req: FastifyRequest, res: FastifyReply)
         return sendErrorResponse(res, error, RESPONSE_STATUS_CODES.FORBIDDEN);
     }
 }
+
+
+
+/*
+    @desc    Handle Google OAuth callback
+    @route   GET /web/auth/googleoauthcallback
+    @access  Public
+*/
+export const getLoginWithGoogleOAuth = async (req: FastifyRequest, res: FastifyReply) => {
+    try {
+        const googleOAuthCallbackRequest = req.query as IGoogleOAuthLoginCallbackRequest;
+        const { iss, code, scope, authuser, prompt } = googleOAuthCallbackRequest;
+
+        const verifyTokenResponse = await verifyGoogleOAuthToken(code);
+
+        const googleUserInfo = await getGoogleUserInfo(verifyTokenResponse.access_token);
+
+        const isUserAuthExists = await UserAuthService.fetchUserAuthByEmail(googleUserInfo.email);
+
+        let userId = isUserAuthExists ? isUserAuthExists.UserId : null;
+
+        if (!isUserAuthExists) {
+            // If user doesn't exist, create a new user and user auth entry
+
+
+            const userDetails: IUser = {
+                FirstName: googleUserInfo.given_name,
+                LastName: googleUserInfo.family_name,
+                FullName: googleUserInfo.name,
+                Email: googleUserInfo.email,
+                IsEmailVerified: googleUserInfo.verified_email,
+            };
+
+            const user = await UserService.addUser(userDetails);
+
+            // If Google profile has a picture, upload it to S3 and save the key in user's ProfilePicture field
+            if(googleUserInfo.picture) {
+                const pictureRes = await uploadFileToS3UsingFileUrl(
+                    googleUserInfo.picture,
+                    String(user._id),
+                    "profile-picture",
+                    `google-oauth-${Date.now()}.jpg`,
+                    "image/jpeg"
+                );
+                await UserService.updateUser(user._id, { ProfilePicture: pictureRes.key });
+
+            }
+
+
+            const userAuthDetails: IUserAuth = {
+                AuthProvider: USER_AUTH_PROVIDERS.GOOGLE,
+                Email: googleUserInfo.email,
+                UserId: user._id,
+            };
+
+            await UserAuthService.addUserAuth(userAuthDetails);
+            userId = user._id;
+        }
+
+        // generate JWT token or session here and send in response
+        const user = await UserService.fetchUserById(userId!);
+
+        if (!user) {
+            throw new Error(RESPONSE_MESSAGE.USER_NOT_FOUND);
+        }
+
+        // generate JWT token or session here and send in response
+        const payload = {
+            User: {
+                _id: user._id,
+                FirstName: user.FirstName,
+                LastName: user.LastName,
+                FullName: user.FullName,
+                Email: user.Email,
+            }
+        };
+
+        const jwtToken = generateJWT(payload);
+
+        res.redirect(`${process.env.FRONTEND_URL}/oauth/google?token=${jwtToken}`);
+    }catch(error) {
+        return sendErrorResponse(res, error, RESPONSE_STATUS_CODES.FORBIDDEN);
+    }
+}
+
+
