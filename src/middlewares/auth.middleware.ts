@@ -5,7 +5,7 @@ import { UNAUTHORIZED } from "../messages/response.messages"
 import { verifyJWT } from "../helpers/jwtHelper"
 
 const PUBLIC_ROUTES_REGEX = [
-    /^\/api\/auth\//, // Allow all routes under /api/auth/
+    /^\/api\/v1\/auth\//, // Allow all routes under /api/v1/auth/
     /^\/web\/auth\//, // Allow all routes under /web/auth/
 ]
 

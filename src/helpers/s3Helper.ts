@@ -5,7 +5,7 @@ import * as RESPONSE_MESSAGES from "../messages/response.messages";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 export const uploadFileToS3UsingFileUrl = async function(fileUrl: string, userId: string, pathName: string, fileName: string, mimeType?: string) {
-    const Key = `${userId}/${pathName}/${fileName}`;
+    const Key = `users/${userId}/${pathName}/${fileName}`;
     
     try {
 
