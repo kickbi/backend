@@ -32,6 +32,43 @@ export const uploadFileToS3UsingFileUrl = async function(fileUrl: string, userId
     }
 }
 
+export const uploadCourseImageToS3 = async function(
+    courseId: string,
+    fileName: string,
+    fileBody: Buffer | Uint8Array | string,
+    mimeType = "image/svg+xml",
+) {
+    if (!process.env.AWS_S3_BUCKET_NAME) {
+        throw new Error(RESPONSE_MESSAGES.S3_BUCKET_NAME_NOT_CONFIGURED);
+    }
+
+    const safeFileName = fileName.trim().replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
+    const Key = `course/${courseId}/${safeFileName}`;
+
+    try {
+        await s3Client.send(
+            new PutObjectCommand({
+                Bucket: process.env.AWS_S3_BUCKET_NAME,
+                Key,
+                Body: fileBody,
+                ContentType: mimeType,
+            }),
+        );
+
+        const url = `https://${process.env.AWS_S3_BUCKET_NAME}.s3.amazonaws.com/${Key}`;
+        const signedUrl = await getS3FileUrl(Key);
+
+        return {
+            key: Key,
+            url,
+            signedUrl,
+        };
+    } catch (error) {
+        const msg = error instanceof Error ? error.message : String(error);
+        throw new Error(RESPONSE_MESSAGES.S3_FILE_UPLOAD_FAILED + ": " + msg);
+    }
+};
+
 
 
 export const getS3FileUrl = async function(key: string) {

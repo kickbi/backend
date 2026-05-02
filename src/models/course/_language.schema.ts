@@ -8,4 +8,6 @@ export const LanguageSchema = new mongoose.Schema({
     [LANGUAGES_SUPPORTED.HINGLISH]: {
         type: String,
     },
+}, {
+    _id: false,
 });

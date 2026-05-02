@@ -1,16 +1,16 @@
 import mongoose from "mongoose";
-import { DIFFICULTY_LEVELS } from "../../constants/course.constants";
-import { LanguageSchema } from "./_language.schema";
+import { LANGUAGES_SUPPORTED } from "../../constants/course.constants";
 
-
-export const AIExplanationSchema = new mongoose.Schema({
-    DifficultyLevel: {
-        type: String,
-        enum: Object.values(DIFFICULTY_LEVELS),
+export const AIExplanationSchema = new mongoose.Schema(
+    {
+        [LANGUAGES_SUPPORTED.ENGLISH]: {
+            type: String,
+        },
+        [LANGUAGES_SUPPORTED.HINGLISH]: {
+            type: String,
+        },
     },
-    Explanation: {
-        type: LanguageSchema,
-    },
-}, {
-    _id: false,
-});
+    {
+        _id: false,
+    }
+);

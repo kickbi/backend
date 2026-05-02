@@ -22,3 +22,4 @@ export const UNAUTHORIZED = "Unauthorized access";
 export const SESSION_EXPIRED = "Session has expired";
 
 export const USER_DETAILS_FETCHED_SUCCESSFULLY = "User details fetched successfully";
+export const SCHRODINGER_COURSE_GENERATED_SUCCESSFULLY = "Schrodinger equation course generated successfully";
