@@ -22,3 +22,9 @@ export const ASSET_TYPES = {
     PDF: "pdf",
     OTHER: "other",
 }
+
+export const TOPIC_TYPES = {
+    THEORY: "theory",
+    PROGRAMMING: "programming",
+    QUIZ: "quiz",
+}

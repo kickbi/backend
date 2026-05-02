@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 import { getNormalMongoConnection } from "../../helpers/dbHelper";
-import { AIExplanationSchema } from "./_aiExplanation.schema";
+import { SeoSchema } from "../seo/_seo.schema";
 
 const ChapterSchema = new mongoose.Schema({
     CourseId: {
@@ -15,15 +15,28 @@ const ChapterSchema = new mongoose.Schema({
     Description: {
         type: String,
     },
-    AIExplanations: {
-        type: [AIExplanationSchema],
+    AIExplanationVersionIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "AIExplanation",
         default: [],
     },
     Order: {
         type: Number,
         required: true,
-    }
-})
+    },
+    TopicsCount: {
+        type: Number,
+        default: 0,
+    },
+    SEO: {
+        type: SeoSchema,
+    },
+});
+
+// indexes
+ChapterSchema.index({ CourseId: 1, Order: 1 }, { unique: true });
+// slug unique within a course
+ChapterSchema.index({ CourseId: 1, "SEO.Slug": 1 }, { unique: true, sparse: true });
 
 const connection = getNormalMongoConnection();
 const Chapter = connection.model("Chapter", ChapterSchema);

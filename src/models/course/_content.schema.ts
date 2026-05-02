@@ -1,8 +1,5 @@
 import mongoose from "mongoose";
 import { ASSET_TYPES, DIFFICULTY_LEVELS, QUESTION_TYPES } from "../../constants/course.constants";
-import { LanguageSchema } from "./_language.schema";
-import { AIExplanationSchema } from "./_aiExplanation.schema";
-
 
 
 
@@ -11,12 +8,13 @@ const ExampleSchema = new mongoose.Schema({
         type: String,
         enum: Object.values(DIFFICULTY_LEVELS),
     },
-    Explanation: {
-        type: LanguageSchema,
+    ExampleContent: {
+        type: String,
     },
     ExampleName: {
         type: String,
     },
+
 }, {
     _id: false,
 });
@@ -38,29 +36,8 @@ const AssetsSchema = new mongoose.Schema({
 });
 
 
-const QuestionsSchema = new mongoose.Schema({
-    Type: {
-        type: String,
-        enum: Object.values(QUESTION_TYPES),
-    },
-    Question: {
-        type: String,
-    },
-    Options: {
-        type: [String],
-    },
-    Answer: {
-        type: String,
-    },
-    Explanation: {
-        type: LanguageSchema,
-    },
-}, {
-    _id: false,
-});
-
 const HintSchema = new mongoose.Schema({
-    Hint: {
+    HintContent: {
         type: String,
     },
     HintName: {
@@ -76,8 +53,9 @@ export const ContentSchema = new mongoose.Schema({
     RawContent: {
         type: String,
     },
-    AIExplanations: {
-        type: [AIExplanationSchema],
+    AIExplanationVersionIds: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "AIExplanation",
         default: [],
     },
     Examples: {
@@ -88,18 +66,12 @@ export const ContentSchema = new mongoose.Schema({
         type: [HintSchema],
         default: [],
     },
-    CommonMistakes: {
-        type: [String],
-        default: [],
-    },
     Assets: {
         type: [AssetsSchema],
         default: [],
-    },
-    Questions: {
-        type: [QuestionsSchema],
-        default: [],
     }
+}, {
+    _id: false,
 });
 
 

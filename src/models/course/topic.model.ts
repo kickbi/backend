@@ -1,8 +1,9 @@
 import mongoose from "mongoose";
-import { DIFFICULTY_LEVELS } from "../../constants/course.constants";
+import { DIFFICULTY_LEVELS, TOPIC_TYPES } from "../../constants/course.constants";
 import { ContentSchema } from "./_content.schema";
 import { getNormalMongoConnection } from "../../helpers/dbHelper";
-import { AIExplanationSchema } from "./_aiExplanation.schema";
+import { QuestionsSchema } from "./_question.schema";
+import { SeoSchema } from "../seo/_seo.schema";
 
 
 const TopicSchema = new mongoose.Schema({
@@ -14,6 +15,12 @@ const TopicSchema = new mongoose.Schema({
     ChapterId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Chapter",
+        required: true,
+    },
+
+    TopicType: {
+        type: String,
+        enum: Object.values(TOPIC_TYPES),
         required: true,
     },
 
@@ -32,19 +39,33 @@ const TopicSchema = new mongoose.Schema({
         type: [String],
         default: [],
     },
-    AIExplanations: {
-        type: [AIExplanationSchema],
-        default: [],
+
+    SEO: {
+        type: SeoSchema,
     },
-    Content: {
-        type: ContentSchema,
-        required: true,
-    },
+
     Order: {
         type: Number,
         required: true,
     },
+
+    Content: {
+        type: ContentSchema,
+    },
+
+    Question: {
+        type: QuestionsSchema,
+    }
+
 });
+
+// indexes
+TopicSchema.index({ ChapterId: 1, Order: 1 }, { unique: true });
+// slug unique within a chapter
+TopicSchema.index({ ChapterId: 1, "SEO.Slug": 1 }, { unique: true, sparse: true });
+
+// whenever a topic is fetched only one AIExplanation should be fetched randomly for that topic, this is to optimize the performance of fetching topics as AIExplanations can be large in size and we don't want to fetch all explanations every time we fetch a topic. 
+// We can achieve this by using a pre hook on the find and findOne methods of the Topic model.
 
 const connection = getNormalMongoConnection();
 const Topic = connection.model("Topic", TopicSchema);
