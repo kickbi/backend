@@ -55,6 +55,7 @@ const CourseSchema = new mongoose.Schema({
     },
     SEO: {
         type: SeoSchema,
+        required: true,
     },
 });
 
@@ -66,4 +67,5 @@ CourseSchema.index({ "SEO.Slug": 1 }, { unique: true, sparse: true });
 const connection = getNormalMongoConnection();
 const Course = connection.model("Course", CourseSchema);
 
+export type CourseDocument = mongoose.InferSchemaType<typeof CourseSchema>;
 export default Course;

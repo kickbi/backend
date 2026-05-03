@@ -42,6 +42,7 @@ const TopicSchema = new mongoose.Schema({
 
     SEO: {
         type: SeoSchema,
+        required: true,
     },
 
     Order: {
@@ -55,8 +56,7 @@ const TopicSchema = new mongoose.Schema({
 
     Question: {
         type: QuestionsSchema,
-    }
-
+    },
 });
 
 // indexes
@@ -70,4 +70,5 @@ TopicSchema.index({ ChapterId: 1, "SEO.Slug": 1 }, { unique: true, sparse: true 
 const connection = getNormalMongoConnection();
 const Topic = connection.model("Topic", TopicSchema);
 
+export type TopicDocument = mongoose.InferSchemaType<typeof TopicSchema>;
 export default Topic;

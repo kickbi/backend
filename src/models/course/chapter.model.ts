@@ -30,6 +30,7 @@ const ChapterSchema = new mongoose.Schema({
     },
     SEO: {
         type: SeoSchema,
+        required: true,
     },
 });
 
@@ -41,4 +42,5 @@ ChapterSchema.index({ CourseId: 1, "SEO.Slug": 1 }, { unique: true, sparse: true
 const connection = getNormalMongoConnection();
 const Chapter = connection.model("Chapter", ChapterSchema);
 
+export type ChapterDocument = mongoose.InferSchemaType<typeof ChapterSchema>;
 export default Chapter;

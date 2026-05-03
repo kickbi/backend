@@ -1303,6 +1303,10 @@ export const generateSchrodingerEquationCourse = async () => {
     const subject = await ensurePhysicsSubject();
     const course = await upsertCourse(subject._id);
 
+    if (!course) {
+        throw new Error("Failed to create or update the Schrodinger course");
+    }
+
     await resetExistingHierarchy(course._id);
 
     const createdChapterIds: string[] = [];
